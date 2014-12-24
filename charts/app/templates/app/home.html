@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+    <script src="https://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+
+      google.load('visualization', '1.0', {'packages':['table', 'corechart']});
+
+      function drawChart() {
+
+          {{ jscode | safe }}
+
+          var jscode_table = new google.visualization.Table(document.getElementById('table_div_jscode'));
+          jscode_table.draw(jscode_data, {showRowNumber: true});
+
+      }
+      google.setOnLoadCallback(drawChart);
+    </script>
+
+</head>
+<body>
+
+<H1>Table created using ToJSCode</H1>
+{{ jscode | safe }}
+<div id="table_div_jscode"></div>
+
+</body>
+</html>
