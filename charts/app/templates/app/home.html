@@ -4,28 +4,36 @@
     <meta charset="UTF-8">
     <title></title>
 
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
     <script src="https://www.google.com/jsapi" type="text/javascript"></script>
     <script type="text/javascript">
 
-      google.load('visualization', '1.0', {'packages':['table', 'corechart']});
+{#        if (typeof google == 'undefined') {#}
+{#                // jQuery is not loaded#}
+{#              alert('no google');#}
+{#            } else {#}
+{#                // jQuery is loaded#}
+{#              alert('si google');#}
+{#            }#}
+{##}
+{#      google.load('visualization', '1.0', {'packages':['table', 'corechart']});#}
+{#      google.setOnLoadCallback(function () {#}
+{##}
+{#          {{ jscode | safe }}#}
+{##}
+{#          var jscode_table = new google.visualization.Table(document.getElementById('table_div_jscode'));#}
+{#          jscode_table.draw(jscode_data, {showRowNumber: true});#}
+{##}
+{#      });#}
 
-      function drawChart() {
+    {{ javascript | safe }}
 
-          {{ jscode | safe }}
-
-          var jscode_table = new google.visualization.Table(document.getElementById('table_div_jscode'));
-          jscode_table.draw(jscode_data, {showRowNumber: true});
-
-      }
-      google.setOnLoadCallback(drawChart);
     </script>
 
 </head>
 <body>
 
-<H1>Table created using ToJSCode</H1>
-{{ jscode | safe }}
-<div id="table_div_jscode"></div>
+<div id="divId"></div>
 
 </body>
 </html>

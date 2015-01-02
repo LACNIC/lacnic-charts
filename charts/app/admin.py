@@ -5,3 +5,7 @@ from app.models import *
 @admin.register(Chart)
 class ChartAdmin(admin.ModelAdmin):
     pass
+
+# @admin.register(ListField)
+# class ListAdmin(admin.ModelAdmin):
+#     pass
