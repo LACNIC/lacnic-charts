@@ -8,24 +8,6 @@
     <script src="https://www.google.com/jsapi" type="text/javascript"></script>
     <script type="text/javascript">
 
-{#        if (typeof google == 'undefined') {#}
-{#                // jQuery is not loaded#}
-{#              alert('no google');#}
-{#            } else {#}
-{#                // jQuery is loaded#}
-{#              alert('si google');#}
-{#            }#}
-{##}
-{#      google.load('visualization', '1.0', {'packages':['table', 'corechart']});#}
-{#      google.setOnLoadCallback(function () {#}
-{##}
-{#          {{ jscode | safe }}#}
-{##}
-{#          var jscode_table = new google.visualization.Table(document.getElementById('table_div_jscode'));#}
-{#          jscode_table.draw(jscode_data, {showRowNumber: true});#}
-{##}
-{#      });#}
-
     {{ javascript | safe }}
 
     </script>
@@ -33,7 +15,7 @@
 </head>
 <body>
 
-<div id="divId"></div>
+<div id="chart" style="width: {{ width | safe }}; height: {{ height | safe }}"></div>
 
 </body>
 </html>

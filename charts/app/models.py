@@ -34,12 +34,14 @@ class Chart(models.Model):
     """
         Chart representation
     """
+    import django.utils.timezone as tz
+
     x = models.TextField(default="")
     y = models.TextField(default="")
     xTitle = models.TextField(default="")
     yTitle = models.TextField(default="")
     link = models.TextField(default="")
-    dateCreated = models.DateField(default=datetime.datetime.now())
+    dateCreated = models.DateField(default=tz.now())
 
 class EventType():
     CREATE=1

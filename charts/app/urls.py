@@ -5,4 +5,5 @@ from django.contrib import admin
 urlpatterns = patterns('',
     url(r'^$', 'app.views.home', name='home'),
     url(r'^hist$', 'app.views.hist', name='hist'),
+    url(r'^hist/code$', 'app.views.javascript', name='hist'),
 )
