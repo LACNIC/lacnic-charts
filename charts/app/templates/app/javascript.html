@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js"></script>
+    <script src="https://www.google.com/jsapi" type="text/javascript"></script>
+    <script type="text/javascript">
+
+    {{ javascript | safe }}
+
+    </script>
+
+</head>
+<body>
+
+<div id="divId" style="width: {{ width | safe }}; height: {{ height | safe }}"></div>
+
+</body>
+</html>
