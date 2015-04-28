@@ -36,7 +36,7 @@ def javascript(request):
     :param request:
     :return: JavaScript code to embedd in site
     """
-    data, kind, divId, labels, colors = process_request(request)
+    data, kind, divId, labels, colors, stacked = process_request(request)
     jscode = column_jscode(labels, data)
     javascript = generate_javascript(jscode, divId, stacked=False, kind='Histogram', colors=colors)
 
@@ -53,7 +53,7 @@ def home(request):
     :return:
     """
 
-    data, kind, divId, labels, colors = process_request(request)
+    data, kind, divId, labels, colors, stacked = process_request(request)
 
     jscode = column_jscode(labels, data)
     javascript = generate_javascript(jscode, divId, stacked=False, kind=kind, colors=colors)
@@ -111,11 +111,10 @@ def column_jscode(labels=[""], *args):
 
 @csrf_exempt
 def hist(request):
-
-    data, kind, divId, labels, colors = process_request(request)
+    data, kind, divId, labels, colors, stacked = process_request(request)
 
     jscode = column_jscode(labels, data)
-    javascript = generate_javascript(jscode, divId, stacked=False, kind='Histogram', colors=colors)
+    javascript = generate_javascript(jscode, divId, stacked=stacked, kind='Histogram', colors=colors)
 
     context = {
         'javascript': javascript
@@ -126,30 +125,46 @@ def hist(request):
 def process_request(request):
     import ast
 
-    def get_value(http_method, key):
-        from django.utils.datastructures import MultiValueDictKeyError
+    def get_string_value(http_method, key):
         try:
             return http_method[key]
-        except MultiValueDictKeyError as e:
-            return ""
         except:
             return ""
 
-    kind = divId = ""
-    data = labels = colors = []
+    def get_list_value(http_method, key):
+        try:
+            return ast.literal_eval(http_method[key])
+        except:
+            return []
+
+    def get_boolean_value(http_method, key):
+        try:
+            if http_method[key].lower() == "true":
+                return True
+            else:
+                return False
+        except:
+            return False
+
+    kind = divId = colors = ""
+    colors = "['orange', 'yellow', 'red']"
+    data = labels = []
+    stacked = False
 
     if request.method == 'GET':
-        data = ast.literal_eval(get_value(request.GET, 'data'))
-        kind = get_value(request.GET, 'kind')
-        divId = get_value(request.GET, 'divId')
-        labels = ast.literal_eval(get_value(request.GET, 'labels'))
-        colors = ast.literal_eval(get_value(request.GET, 'colors'))
+        data = get_list_value(request.GET, 'data')
+        kind = get_string_value(request.GET, 'kind')
+        divId = get_string_value(request.GET, 'divId')
+        labels = get_list_value(request.GET, 'labels')
+        colors = get_list_value(request.GET, 'colors')
+        stacked = get_boolean_value(request.GET, 'stacked')
 
     if request.method == 'POST':
-        data = ast.literal_eval(get_value(request.POST, 'data'))
-        kind = get_value(request.POST, 'kind')
-        divId = get_value(request.POST, 'divId')
-        labels = ast.literal_eval(get_value(request.POST, 'labels'))
-        colors = ast.literal_eval(get_value(request.POST, 'colors'))
+        data = get_list_value(request.POST, 'data')
+        kind = get_string_value(request.POST, 'kind')
+        divId = get_string_value(request.POST, 'divId')
+        labels = get_list_value(request.POST, 'labels')
+        colors = get_list_value(request.POST, 'colors')
+        stacked = get_boolean_value(request.POST, 'stacked')
 
-    return data, kind, divId, labels, colors
+    return data, kind, divId, labels, colors, stacked
