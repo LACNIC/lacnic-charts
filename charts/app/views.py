@@ -36,17 +36,28 @@ def code_hist(request):
     """
 
     :param request:
-    :return: JavaScript code to embedd in site (histogram)
+    :return: JavaScript code to embed in site (histogram)
     """
-    data, kind, divId, labels, colors, stacked, xAxis = process_request(request)
+
+
+    from charts.settings import ALLOWED_HOSTS as ORIGINS
+
+    data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
     jscode = column_jscode(labels, xAxis, data)
     javascript = generate_javascript(jscode, divId, stacked=False, kind='Histogram', colors=colors)
+
+    if callback != "":
+        javascript = "%s(%s)" % (callback, javascript)
 
     context = {
         'javascript': javascript
     }
 
-    return render(request, 'app/javascript.html', context, content_type="text")
+    response = render(request, 'app/javascript.html', context, content_type="text")
+    response['Access-Control-Allow-Origin'] = ORIGINS[0]
+    response['Access-Control-Allow-Methods'] = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
+
+    return response
 
 
 @csrf_exempt
@@ -54,9 +65,9 @@ def code(request):
     """
 
     :param request:
-    :return: JavaScript code to embedd in site
+    :return: JavaScript code to embed in site
     """
-    data, kind, divId, labels, colors, stacked, xAxis = process_request(request)
+    data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
     jscode = column_jscode(labels, xAxis, data)
     javascript = generate_javascript(jscode, divId, stacked=stacked, kind=kind, colors=colors)
 
@@ -73,7 +84,7 @@ def candlestick(request):
     :param request:
     :return:
     """
-    data, kind, divId, labels, colors, stacked, xAxis = process_request(request)
+    data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
 
 
 def home(request):
@@ -83,7 +94,7 @@ def home(request):
     :return:
     """
 
-    data, kind, divId, labels, colors, stacked, xAxis = process_request(request)
+    data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
 
     jscode = column_jscode(labels, xAxis, data)
     javascript = generate_javascript(jscode, divId, stacked=stacked, kind=kind, colors=colors)
@@ -107,7 +118,6 @@ def column_jscode(labels=[""], xAxis="number", *args):
 
     series = args
     series = list(*series)
-    # x = series[0]
 
     # TODO deben tener el mismo largo
     # TODO len(labels)==len(args)-1
@@ -115,8 +125,6 @@ def column_jscode(labels=[""], xAxis="number", *args):
     # chart = Chart()
     description = {}
     chars = []  # lista de caracteres que se usan para identificar cada serie
-
-    print xAxis
 
     for i, arg in enumerate(series):
         c = string.ascii_lowercase[i]
@@ -152,7 +160,10 @@ def column_jscode(labels=[""], xAxis="number", *args):
 
 @csrf_exempt
 def hist(request):
-    data, kind, divId, labels, colors, stacked, xAxis = process_request(request)
+    from django import http
+    from charts.settings import ALLOWED_HOSTS as ORIGINS
+
+    data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
 
     jscode = column_jscode(labels, xAxis, data)
     javascript = generate_javascript(jscode, divId, stacked=stacked, kind='Histogram', colors=colors)
@@ -161,7 +172,9 @@ def hist(request):
         'javascript': javascript
     }
 
-    return render(request, 'app/home.html', context)
+    response = render(request, 'app/home.html', context)
+    response['Access-Control-Allow-Origin'] = ORIGINS
+    return response
 
 
 def process_request(request):
@@ -191,7 +204,8 @@ def process_request(request):
     kind = "ColumnChart"
     divId = ""
     xAxis = "number"
-    data = labels = []
+    callback = ""
+    data = labels = colors = []
     stacked = False
 
     if request.method == 'GET':
@@ -199,6 +213,7 @@ def process_request(request):
         kind = get_string_value(request.GET, 'kind', kind)
         divId = get_string_value(request.GET, 'divId', divId)
         xAxis = get_string_value(request.GET, 'xAxis', xAxis)
+        callback = get_string_value(request.GET, 'callback', callback)
         labels = get_list_value(request.GET, 'labels')
         colors = get_list_value(request.GET, 'colors')
         stacked = get_boolean_value(request.GET, 'stacked')
@@ -208,8 +223,9 @@ def process_request(request):
         kind = get_string_value(request.POST, 'kind', kind)
         divId = get_string_value(request.POST, 'divId', divId)
         xAxis = get_string_value(request.POST, 'xAxis', xAxis)
+        callback = get_string_value(request.POST, 'callback', callback)
         labels = get_list_value(request.POST, 'labels')
         colors = get_list_value(request.POST, 'colors')
         stacked = get_boolean_value(request.POST, 'stacked')
 
-    return data, kind, divId, labels, colors, stacked, xAxis
+    return data, kind, divId, labels, colors, stacked, xAxis, callback
