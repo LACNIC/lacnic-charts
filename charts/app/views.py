@@ -1,9 +1,7 @@
 # coding=utf-8
 from django.shortcuts import render
-from django.utils.datastructures import MultiValueDict
 from django.views.decorators.csrf import csrf_exempt
 from libs.gviz_api import *
-from app.models import Chart
 
 KINDS = ['AreaChart', 'ColumnChart']
 
@@ -12,11 +10,13 @@ def generate_javascript(jscode, divId, backgroundColor="'transparent'", stacked=
     """
 
     :param jscode:
+    :param divId:
+    :param backgroundColor:
     :param stacked:
     :param kind:
+    :param colors:
     :return:
     """
-
     options = "{showRowNumber: true," \
               "isStacked: %s," \
               "colors : %s," \
@@ -40,11 +40,16 @@ def code_hist(request):
     """
 
 
-    from charts.settings import ALLOWED_HOSTS as ORIGINS
+    # from charts.settings import ALLOWED_HOSTS as ORIGINS
 
     data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
+
+    print len(data)
+
     jscode = column_jscode(labels, xAxis, data)
     javascript = generate_javascript(jscode, divId, stacked=False, kind='Histogram', colors=colors)
+
+    print javascript
 
     if callback != "":
         javascript = "%s(%s)" % (callback, javascript)
@@ -54,11 +59,9 @@ def code_hist(request):
     }
 
     response = render(request, 'app/javascript.html', context, content_type="text")
-    response['Access-Control-Allow-Origin'] = ORIGINS[0]
     response['Access-Control-Allow-Methods'] = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
 
     return response
-
 
 @csrf_exempt
 def code(request):
@@ -67,7 +70,9 @@ def code(request):
     :param request:
     :return: JavaScript code to embed in site
     """
+
     data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
+
     jscode = column_jscode(labels, xAxis, data)
     javascript = generate_javascript(jscode, divId, stacked=stacked, kind=kind, colors=colors)
 
@@ -116,7 +121,7 @@ def column_jscode(labels=[""], xAxis="number", *args):
     """
     import string, datetime
 
-    series = args
+    series = args   
     series = list(*series)
 
     # TODO deben tener el mismo largo
@@ -161,7 +166,7 @@ def column_jscode(labels=[""], xAxis="number", *args):
 @csrf_exempt
 def hist(request):
     from django import http
-    from charts.settings import ALLOWED_HOSTS as ORIGINS
+    # from charts.settings import ALLOWED_HOSTS as ORIGINS
 
     data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
 
@@ -173,7 +178,7 @@ def hist(request):
     }
 
     response = render(request, 'app/home.html', context)
-    response['Access-Control-Allow-Origin'] = ORIGINS
+    # response['Access-Control-Allow-Origin'] = ORIGINS
     return response
 
 
