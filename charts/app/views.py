@@ -44,12 +44,8 @@ def code_hist(request):
 
     data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
 
-    print len(data)
-
     jscode = column_jscode(labels, xAxis, data)
     javascript = generate_javascript(jscode, divId, stacked=False, kind='Histogram', colors=colors)
-
-    print javascript
 
     if callback != "":
         javascript = "%s(%s)" % (callback, javascript)
