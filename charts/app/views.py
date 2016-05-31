@@ -6,7 +6,8 @@ from libs.gviz_api import *
 KINDS = ['AreaChart', 'ColumnChart']
 
 
-def generate_javascript(jscode, divId, backgroundColor="'transparent'", stacked=False, kind='ColumnChart', colors="['orange', 'yellow', 'red']"):
+def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=False, kind='ColumnChart', colors="['orange', 'yellow', 'red']", my_options = {}):
+    import json
     """
 
     :param jscode:
@@ -17,17 +18,27 @@ def generate_javascript(jscode, divId, backgroundColor="'transparent'", stacked=
     :param colors:
     :return:
     """
-    options = "{showRowNumber: true," \
-              "isStacked: %s," \
-              "colors : %s," \
-              "backgroundColor : %s}" % (str(stacked).lower(), colors, backgroundColor)
+    options = dict()
+    # options += my_options
+    options["showRowNumber"] = "true"
+    options["isStacked"] = str(stacked).lower()
+    options["colors"] = colors
+    options["backgroundColor"] = backgroundColor
+    options["pieHole"] = 0.5
+
+    # options = "{showRowNumber: true," \
+    #           "isStacked: %s," \
+    #           "colors : %s," \
+    #           "backgroundColor : %s}" % (str(stacked).lower(), colors, backgroundColor)
+
+    print json.dumps(options)
 
     javascript = "google.load('visualization', '1.0', {'packages':['table', 'corechart']});" \
                  "google.setOnLoadCallback(function() {" \
                  " %s " \
                  "var jscode_table = new google.visualization.%s(document.getElementById('%s'));" \
                  "jscode_table.draw(jscode_data, %s);" \
-                 "});" % (jscode, kind, divId, options)
+                 "});" % (jscode, kind, divId, json.dumps(options))
     return javascript
 
 
@@ -228,5 +239,7 @@ def process_request(request):
         labels = get_list_value(request.POST, 'labels')
         colors = get_list_value(request.POST, 'colors')
         stacked = get_boolean_value(request.POST, 'stacked')
+
+    print data
 
     return data, kind, divId, labels, colors, stacked, xAxis, callback
