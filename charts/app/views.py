@@ -19,19 +19,12 @@ def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=Fa
     :return:
     """
     options = dict()
-    # options += my_options
+    # options += my_options # TODO merge dicts
     options["showRowNumber"] = "true"
     options["isStacked"] = str(stacked).lower()
     options["colors"] = colors
     options["backgroundColor"] = backgroundColor
     options["pieHole"] = 0.5
-
-    # options = "{showRowNumber: true," \
-    #           "isStacked: %s," \
-    #           "colors : %s," \
-    #           "backgroundColor : %s}" % (str(stacked).lower(), colors, backgroundColor)
-
-    print json.dumps(options)
 
     javascript = "google.load('visualization', '1.0', {'packages':['table', 'corechart']});" \
                  "google.setOnLoadCallback(function() {" \
