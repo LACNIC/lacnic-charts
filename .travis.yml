@@ -38,6 +38,7 @@ before_script:
 script:
   - python charts/manage.py test
   - coverage run charts/manage.py test
+  - artillery run artillery.yml
 #  - simon-javascript/node_modules/karma/bin/karma start simon-javascript/my.conf.js --single-run
 
 after_success: coveralls
