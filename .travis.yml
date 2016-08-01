@@ -33,6 +33,7 @@ before_script:
 #  - python monitor/manage.py migrate app
   - npm install karma
   - npm install karma-browserstack-launcher --save-dev
+  - npm install -g artillery
 
 script:
   - python charts/manage.py test
