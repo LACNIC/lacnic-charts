@@ -6,7 +6,7 @@ from libs.gviz_api import *
 KINDS = ['AreaChart', 'ColumnChart']
 
 
-def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=False, kind='ColumnChart', colors="['orange', 'yellow', 'red']", my_options = {}):
+def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=False, kind='ColumnChart', colors="['orange', 'yellow', 'red']", my_options={}):
     import json
     """
 
@@ -18,20 +18,24 @@ def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=Fa
     :param colors:
     :return:
     """
+
     options = dict()
-    # options += my_options # TODO merge dicts
     options["showRowNumber"] = "true"
     options["isStacked"] = str(stacked).lower()
     options["colors"] = colors
     options["backgroundColor"] = backgroundColor
-    options["pieHole"] = 0.5
+    google_options = {}
 
+    for d in [options, my_options]:
+        google_options.update(d)
+
+    dumps_final = json.dumps(google_options)
     javascript = "google.load('visualization', '1.0', {'packages':['table', 'corechart']});" \
                  "google.setOnLoadCallback(function() {" \
                  " %s " \
                  "var jscode_table = new google.visualization.%s(document.getElementById('%s'));" \
                  "jscode_table.draw(jscode_data, %s);" \
-                 "});" % (jscode, kind, divId, json.dumps(options))
+                 "});" % (jscode, kind, divId, dumps_final)
     return javascript
 
 
@@ -43,13 +47,15 @@ def code_hist(request):
     :return: JavaScript code to embed in site (histogram)
     """
 
+    import numpy
 
-    # from charts.settings import ALLOWED_HOSTS as ORIGINS
+    data, kind, divId, labels, colors, stacked, xAxis, callback, my_options = process_request(request)
 
-    data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
-
+    bins = numpy.linspace(start=0, stop=800)
+    histogram = numpy.histogram(data, bins)
+    data = [histogram[1], histogram[0]]
     jscode = column_jscode(labels, xAxis, data)
-    javascript = generate_javascript(jscode, divId, stacked=False, kind='Histogram', colors=colors)
+    javascript = generate_javascript(jscode, divId, stacked=False, kind='ColumnChart', colors=colors, my_options=my_options)
 
     if callback != "":
         javascript = "%s(%s)" % (callback, javascript)
@@ -63,6 +69,7 @@ def code_hist(request):
 
     return response
 
+
 @csrf_exempt
 def code(request):
     """
@@ -71,10 +78,10 @@ def code(request):
     :return: JavaScript code to embed in site
     """
 
-    data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
+    data, kind, divId, labels, colors, stacked, xAxis, callback, my_options = process_request(request)
 
     jscode = column_jscode(labels, xAxis, data)
-    javascript = generate_javascript(jscode, divId, stacked=stacked, kind=kind, colors=colors)
+    javascript = generate_javascript(jscode, divId, stacked=stacked, kind=kind, colors=colors, my_options=my_options)
 
     context = {
         'javascript': javascript
@@ -99,10 +106,10 @@ def home(request):
     :return:
     """
 
-    data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
+    data, kind, divId, labels, colors, stacked, xAxis, callback, my_options = process_request(request)
 
     jscode = column_jscode(labels, xAxis, data)
-    javascript = generate_javascript(jscode, divId, stacked=stacked, kind=kind, colors=colors)
+    javascript = generate_javascript(jscode, divId, stacked=stacked, kind=kind, colors=colors, my_options=my_options)
 
     context = {
         'javascript': javascript
@@ -121,6 +128,7 @@ def column_jscode(labels=[""], xAxis="number", *args):
     """
     import string, datetime
 
+    # series: [[x-axis], [y1-axis], [y2-axis]]
     series = args   
     series = list(*series)
 
@@ -134,9 +142,9 @@ def column_jscode(labels=[""], xAxis="number", *args):
     for i, arg in enumerate(series):
         c = string.ascii_lowercase[i]
         chars.append(c)
-        if xAxis == 'date' and i == 0:
+        if xAxis == 'date' and i == 0:  # i==0 --> x-axis
             description[str(c)] = ('date', "")
-        elif xAxis == 'string' and i == 0:
+        elif xAxis == 'string' and i == 0:   # i==0 --> x-axis
             description[str(c)] = ('string', "")
         else:
             description[str(c)] = ('number', labels[i - 1])
@@ -165,20 +173,17 @@ def column_jscode(labels=[""], xAxis="number", *args):
 
 @csrf_exempt
 def hist(request):
-    from django import http
-    # from charts.settings import ALLOWED_HOSTS as ORIGINS
 
-    data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
+    data, kind, divId, labels, colors, stacked, xAxis, callback, my_options = process_request(request)
 
     jscode = column_jscode(labels, xAxis, data)
-    javascript = generate_javascript(jscode, divId, stacked=stacked, kind='Histogram', colors=colors)
+    javascript = generate_javascript(jscode, divId, stacked=stacked, kind='Histogram', colors=colors, my_options=my_options)
 
     context = {
         'javascript': javascript
     }
 
     response = render(request, 'app/home.html', context)
-    # response['Access-Control-Allow-Origin'] = ORIGINS
     return response
 
 
@@ -191,11 +196,17 @@ def process_request(request):
         except:
             return default
 
-    def get_list_value(http_method, key):
+    def get_python_value(http_method, key, default):
         try:
             return ast.literal_eval(http_method[key])
         except:
-            return []
+            return default
+
+    def get_list_value(http_method, key):
+        return get_python_value(http_method=http_method, key=key, default=[])
+
+    def get_dict_value(http_method, key):
+        return get_python_value(http_method=http_method, key=key, default={})
 
     def get_boolean_value(http_method, key):
         try:
@@ -212,6 +223,7 @@ def process_request(request):
     callback = ""
     data = labels = colors = []
     stacked = False
+    my_options = {}
 
     if request.method == 'GET':
         data = get_list_value(request.GET, 'data')
@@ -222,6 +234,7 @@ def process_request(request):
         labels = get_list_value(request.GET, 'labels')
         colors = get_list_value(request.GET, 'colors')
         stacked = get_boolean_value(request.GET, 'stacked')
+        my_options = get_dict_value(request.GET, 'my_options')
 
     if request.method == 'POST':
         data = get_list_value(request.POST, 'data')
@@ -232,7 +245,6 @@ def process_request(request):
         labels = get_list_value(request.POST, 'labels')
         colors = get_list_value(request.POST, 'colors')
         stacked = get_boolean_value(request.POST, 'stacked')
+        my_options = get_dict_value(request.POST, 'my_options')
 
-    print data
-
-    return data, kind, divId, labels, colors, stacked, xAxis, callback
+    return data, kind, divId, labels, colors, stacked, xAxis, callback, my_options
