@@ -33,20 +33,20 @@ if HOSTNAME == 'simon':
         'natmeter.labs.lacnic.net',
         'lacnic.net'
     ]
-    # CORS_ORIGIN_WHITELIST = (
-    #     'simon.lacnic.net',
-    #     'labs.lacnic.net',
-    #     'natmeter.labs.lacnic.net',
-    #     'lacnic.net'
-    # )
+    CORS_ORIGIN_WHITELIST = (
+        'simon.lacnic.net',
+        'charts.dev.lacnic.net',
+        'labs.lacnic.net',
+        'natmeter.labs.lacnic.net',
+        'lacnic.net'
+    )
     # CORS_ALLOW_HEADERS = (
     #     'x-requested-with',
     #     'content-type',
     #     'accept',
     #     'origin',
     #     'authorization',
-    #     'x-csrftoken',
-    #     'Access-Control-Allow-Origin'
+    #     'x-csrftoken'
     # )
 
 TEMPLATE_DEBUG = True
