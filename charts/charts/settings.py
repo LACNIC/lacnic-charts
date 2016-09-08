@@ -22,6 +22,9 @@ SECRET_KEY = 'a9n=uhb^#bqiw2v0ozhp9pu@j_sr*!vl0(awu8_t78=t_xupl&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+HOSTNAME = socket.gethostname()
+if HOSTNAME == 'simon':
+    DEBUG = False
 
 TEMPLATE_DEBUG = True
 
