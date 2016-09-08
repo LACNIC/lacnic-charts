@@ -25,22 +25,27 @@ DEBUG = True
 HOSTNAME = socket.gethostname()
 if HOSTNAME == 'simon':
     DEBUG = False
+    # CORS_ORIGIN_ALLOW_ALL = True
+    CORS_ORIGIN_WHITELIST = (
+        'simon.lacnic.net',
+        'labs.lacnic.net',
+        'natmeter.labs.lacnic.net',
+        'warp.lacnic.net',
+        'lacnic.net'
+    )
+    CORS_ALLOW_HEADERS = (
+        'x-requested-with',
+        'content-type',
+        'accept',
+        'origin',
+        'authorization',
+        'x-csrftoken',
+        'Access-Control-Allow-Origin'
+    )
 
 TEMPLATE_DEBUG = True
 
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = (
-    'lacnic.net'
-)
-CORS_ALLOW_HEADERS = (
-    'x-requested-with',
-    'content-type',
-    'accept',
-    'origin',
-    'authorization',
-    'x-csrftoken',
-    'Access-Control-Allow-Origin'
-)
+
 
 # Application definition
 
