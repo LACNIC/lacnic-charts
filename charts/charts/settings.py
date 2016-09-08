@@ -22,26 +22,26 @@ SECRET_KEY = 'a9n=uhb^#bqiw2v0ozhp9pu@j_sr*!vl0(awu8_t78=t_xupl&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+CORS_ORIGIN_ALLOW_ALL = True
 HOSTNAME = socket.gethostname()
 if HOSTNAME == 'simon':
     DEBUG = False
-    # CORS_ORIGIN_ALLOW_ALL = True
-    CORS_ORIGIN_WHITELIST = (
-        'simon.lacnic.net',
-        'labs.lacnic.net',
-        'natmeter.labs.lacnic.net',
-        'warp.lacnic.net',
-        'lacnic.net'
-    )
-    CORS_ALLOW_HEADERS = (
-        'x-requested-with',
-        'content-type',
-        'accept',
-        'origin',
-        'authorization',
-        'x-csrftoken',
-        'Access-Control-Allow-Origin'
-    )
+    # CORS_ORIGIN_WHITELIST = (
+    #     'simon.lacnic.net',
+    #     'labs.lacnic.net',
+    #     'natmeter.labs.lacnic.net',
+    #     'warp.lacnic.net',
+    #     'lacnic.net'
+    # )
+    # CORS_ALLOW_HEADERS = (
+    #     'x-requested-with',
+    #     'content-type',
+    #     'accept',
+    #     'origin',
+    #     'authorization',
+    #     'x-csrftoken',
+    #     'Access-Control-Allow-Origin'
+    # )
 
 TEMPLATE_DEBUG = True
 
