@@ -29,8 +29,18 @@ if HOSTNAME == 'simon':
 TEMPLATE_DEBUG = True
 
 CORS_ORIGIN_ALLOW_ALL = True
-
-# ALLOWED_HOSTS = ['http://127.0.0.1:8000']
+CORS_ORIGIN_WHITELIST = (
+    'lacnic.net'
+)
+CORS_ALLOW_HEADERS = (
+    'x-requested-with',
+    'content-type',
+    'accept',
+    'origin',
+    'authorization',
+    'x-csrftoken',
+    'Access-Control-Allow-Origin'
+)
 
 # Application definition
 
