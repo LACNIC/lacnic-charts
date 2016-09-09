@@ -7,6 +7,7 @@ python:
 services:
   - postgresql
 
+addons:
   apt:
     packages:
     - libpq-dev
@@ -25,7 +26,6 @@ install:
 before_script:
   - npm install karma
   - npm install karma-browserstack-launcher --save-dev
-  - npm install --save -g artillery
 
 script:
   - python charts/manage.py test
