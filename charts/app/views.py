@@ -3,10 +3,11 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from libs.gviz_api import *
 
+
 KINDS = ['AreaChart', 'ColumnChart']
 
 
-def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=False, kind='ColumnChart', colors="['orange', 'yellow', 'red']", my_options={}):
+def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=False, kind='ColumnChart', colors="['#FAA519', '#009DCA', '#C53425', '#FFE07F', '#4B4B4D']", my_options={}):
     import json
     """
 
@@ -131,6 +132,7 @@ def column_jscode(labels=[""], xAxis="number", *args):
     # series: [[x-axis], [y1-axis], [y2-axis]]
     series = args   
     series = list(*series)
+    # print "series:" + str(series)
 
     # TODO deben tener el mismo largo
     # TODO len(labels)==len(args)-1
@@ -142,6 +144,9 @@ def column_jscode(labels=[""], xAxis="number", *args):
     for i, arg in enumerate(series):
         c = string.ascii_lowercase[i]
         chars.append(c)
+        # print "i:" + str(i)
+        # print "arg:" + str(arg)
+        # print "c:" + str(c)
         if xAxis == 'date' and i == 0:  # i==0 --> x-axis
             description[str(c)] = ('date', "")
         elif xAxis == 'string' and i == 0:   # i==0 --> x-axis
@@ -149,13 +154,17 @@ def column_jscode(labels=[""], xAxis="number", *args):
         else:
             description[str(c)] = ('number', labels[i - 1])
     data_table = DataTable(description)
+    # print data_table
 
     zipped = zip(*series)  # [(a1, b1, c1), (a2, b2, c2), ...]
+    # print zipped
+    # print chars
     data = []
     keys = []
     for z in zipped:
         registro = {}
         for i, c in enumerate(chars):
+            # print i, c
             if c not in keys: keys.append(c)
 
             if xAxis == 'date' and i == 0:  # unicode comparison, not string
@@ -163,6 +172,8 @@ def column_jscode(labels=[""], xAxis="number", *args):
             else:  # normal case
                 registro[str(c)] = z[i]
         data.append(registro)
+
+    # print data
 
     data_table.LoadData(data)
     jscode = data_table.ToJSCode("jscode_data",
@@ -246,5 +257,12 @@ def process_request(request):
         colors = get_list_value(request.POST, 'colors')
         stacked = get_boolean_value(request.POST, 'stacked')
         my_options = get_dict_value(request.POST, 'my_options')
+
+    if colors == []:
+        colors.append("#FAA519")
+        colors.append("#009DCA")
+        colors.append("#C53425")
+        colors.append("#FFE07F")
+        colors.append("#4B4B4D")
 
     return data, kind, divId, labels, colors, stacked, xAxis, callback, my_options
