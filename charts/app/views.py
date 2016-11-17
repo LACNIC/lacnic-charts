@@ -52,7 +52,7 @@ def code_hist(request):
 
     data, kind, divId, labels, colors, stacked, xAxis, callback, my_options = process_request(request)
 
-    bins = numpy.linspace(start=0, stop=800)
+    bins = numpy.linspace(start=0, stop=int(max(data)))
     histogram = numpy.histogram(data, bins)
     data = [histogram[1], histogram[0]]
     jscode = column_jscode(labels, xAxis, data)
