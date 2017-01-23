@@ -50,12 +50,12 @@ def code_hist(request):
 
     import numpy
 
-    data, kind, divId, labels, colors, stacked, xAxis, callback, my_options = process_request(request)
+    data, kind, divId, labels, colors, stacked, xType, callback, my_options = process_request(request)
 
     bins = numpy.linspace(start=0, stop=int(max(data)))
     histogram = numpy.histogram(data, bins)
     data = [histogram[1], histogram[0]]
-    jscode = column_jscode(labels, xAxis, data)
+    jscode = column_jscode(labels, xType, data)
     javascript = generate_javascript(jscode, divId, stacked=False, kind='ColumnChart', colors=colors, my_options=my_options)
 
     if callback != "":
@@ -79,9 +79,9 @@ def code(request):
     :return: JavaScript code to embed in site
     """
 
-    data, kind, divId, labels, colors, stacked, xAxis, callback, my_options = process_request(request)
+    data, kind, divId, labels, colors, stacked, xType, callback, my_options = process_request(request)
 
-    jscode = column_jscode(labels, xAxis, data)
+    jscode = column_jscode(labels, xType, data)
     javascript = generate_javascript(jscode, divId, stacked=stacked, kind=kind, colors=colors, my_options=my_options)
 
     context = {
@@ -97,7 +97,7 @@ def candlestick(request):
     :param request:
     :return:
     """
-    data, kind, divId, labels, colors, stacked, xAxis, callback = process_request(request)
+    data, kind, divId, labels, colors, stacked, xType, callback = process_request(request)
 
 
 def home(request):
@@ -107,9 +107,9 @@ def home(request):
     :return:
     """
 
-    data, kind, divId, labels, colors, stacked, xAxis, callback, my_options = process_request(request)
+    data, kind, divId, labels, colors, stacked, xType, callback, my_options = process_request(request)
 
-    jscode = column_jscode(labels, xAxis, data)
+    jscode = column_jscode(labels, xType, data)
     javascript = generate_javascript(jscode, divId, stacked=stacked, kind=kind, colors=colors, my_options=my_options)
 
     context = {
@@ -119,7 +119,7 @@ def home(request):
     return render(request, 'app/home.html', context)
 
 
-def column_jscode(labels=[""], xAxis="number", *args):
+def column_jscode(labels=[""], xType="number", *args):
     """
     :param args: series a graficar.
     Debe ser len(args)>=1
@@ -147,9 +147,9 @@ def column_jscode(labels=[""], xAxis="number", *args):
         # print "i:" + str(i)
         # print "arg:" + str(arg)
         # print "c:" + str(c)
-        if xAxis == 'date' and i == 0:  # i==0 --> x-axis
+        if xType == 'date' and i == 0:  # i==0 --> x-axis
             description[str(c)] = ('date', "")
-        elif xAxis == 'string' and i == 0:   # i==0 --> x-axis
+        elif xType == 'string' and i == 0:   # i==0 --> x-axis
             description[str(c)] = ('string', "")
         else:
             description[str(c)] = ('number', labels[i - 1])
@@ -167,7 +167,7 @@ def column_jscode(labels=[""], xAxis="number", *args):
             # print i, c
             if c not in keys: keys.append(c)
 
-            if xAxis == 'date' and i == 0:  # unicode comparison, not string
+            if xType == 'date' and i == 0:  # unicode comparison, not string
                 registro[str(c)] = datetime.datetime.strptime(z[i], "%d/%m/%Y")
             else:  # normal case
                 registro[str(c)] = z[i]
@@ -185,9 +185,9 @@ def column_jscode(labels=[""], xAxis="number", *args):
 @csrf_exempt
 def hist(request):
 
-    data, kind, divId, labels, colors, stacked, xAxis, callback, my_options = process_request(request)
+    data, kind, divId, labels, colors, stacked, xType, callback, my_options = process_request(request)
 
-    jscode = column_jscode(labels, xAxis, data)
+    jscode = column_jscode(labels, xType, data)
     javascript = generate_javascript(jscode, divId, stacked=stacked, kind='Histogram', colors=colors, my_options=my_options)
 
     context = {
@@ -230,7 +230,7 @@ def process_request(request):
 
     kind = "ColumnChart"
     divId = ""
-    xAxis = "number"
+    xType = "number"
     callback = ""
     data = labels = colors = []
     stacked = False
@@ -240,7 +240,7 @@ def process_request(request):
         data = get_list_value(request.GET, 'data')
         kind = get_string_value(request.GET, 'kind', kind)
         divId = get_string_value(request.GET, 'divId', divId)
-        xAxis = get_string_value(request.GET, 'xAxis', xAxis)
+        xType = get_string_value(request.GET, 'xType', xType)
         callback = get_string_value(request.GET, 'callback', callback)
         labels = get_list_value(request.GET, 'labels')
         colors = get_list_value(request.GET, 'colors')
@@ -251,7 +251,7 @@ def process_request(request):
         data = get_list_value(request.POST, 'data')
         kind = get_string_value(request.POST, 'kind', kind)
         divId = get_string_value(request.POST, 'divId', divId)
-        xAxis = get_string_value(request.POST, 'xAxis', xAxis)
+        xType = get_string_value(request.POST, 'xType', xType)
         callback = get_string_value(request.POST, 'callback', callback)
         labels = get_list_value(request.POST, 'labels')
         colors = get_list_value(request.POST, 'colors')
@@ -265,4 +265,4 @@ def process_request(request):
         colors.append("#FFE07F")
         colors.append("#4B4B4D")
 
-    return data, kind, divId, labels, colors, stacked, xAxis, callback, my_options
+    return data, kind, divId, labels, colors, stacked, xType, callback, my_options
