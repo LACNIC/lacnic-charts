@@ -140,7 +140,7 @@ def column_jscode(labels=[""], xType="number", x=[""], *args):
     # print "series:" + str(series)
 
     # TODO deben tener el mismo largo
-    # TODO len(labels)==len(args)-1
+    # TODO len(labels)==len(args)
 
     # chart = Chart()
     description = {}
