@@ -7,5 +7,5 @@ urlpatterns = patterns('',
                        url(r'^code/$', 'app.views.code', name='code'),
 
                        url(r'^hist/$', 'app.views.hist', name='hist'),
-                       url(r'^hist/code/$', 'app.views.code_hist', name='hist'),
+                       url(r'^hist/code/$', 'app.views.code_hist', name='hist_code'),
 )

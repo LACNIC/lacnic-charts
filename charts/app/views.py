@@ -2,13 +2,13 @@
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from libs.gviz_api import *
+import json
 
 
 KINDS = ['AreaChart', 'ColumnChart']
 
 
 def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=False, kind='ColumnChart', colors="['#FAA519', '#009DCA', '#C53425', '#FFE07F', '#4B4B4D']", my_options={}):
-    import json
     """
 
     :param jscode:
@@ -48,27 +48,36 @@ def code_hist(request):
     :return: JavaScript code to embed in site (histogram)
     """
 
-    import numpy
+    # import numpy
+    #
+    # x, ys, kind, divId, labels, colors, stacked, xType, callback, my_options = process_request(request)
+    #
+    # bins = numpy.linspace(start=0, stop=int(max(x)))
+    # histogram = numpy.histogram(x, bins)
+    # x = [histogram[1], histogram[0]]
+    # print labels, xType, x, ys
+    # jscode = column_jscode(labels, xType, x, ys)
+    # javascript = generate_javascript(jscode, divId, stacked=False, kind='ColumnChart', colors=colors, my_options=my_options)
+    #
+    # if callback != "":
+    #     javascript = "%s(%s)" % (callback, javascript)
+    #
+    # context = {
+    #     'javascript': javascript
+    # }
+    #
+    # response = render(request, 'app/javascript.html', context, content_type="text")
+    # response['Access-Control-Allow-Methods'] = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
 
     x, ys, kind, divId, labels, colors, stacked, xType, callback, my_options = process_request(request)
 
-    bins = numpy.linspace(start=0, stop=int(max(x)))
-    histogram = numpy.histogram(x, bins)
-    x = [histogram[1], histogram[0]]
-    jscode = column_jscode(labels, xType, x, ys)
-    javascript = generate_javascript(jscode, divId, stacked=False, kind='ColumnChart', colors=colors, my_options=my_options)
-
-    if callback != "":
-        javascript = "%s(%s)" % (callback, javascript)
+    jscode = column_jscode(labels, xType, x, [])
+    javascript = generate_javascript(jscode, divId, stacked=stacked, kind='Histogram', colors=colors, my_options=my_options)
 
     context = {
         'javascript': javascript
     }
-
-    response = render(request, 'app/javascript.html', context, content_type="text")
-    response['Access-Control-Allow-Methods'] = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
-
-    return response
+    return render(request, 'app/javascript.html', context, content_type="text")
 
 
 @csrf_exempt
@@ -135,7 +144,7 @@ def column_jscode(labels=[""], xType="number", x=[""], *args):
     series.append(x)
     for elem in args:
         series.append(elem)
-    # print series
+    print series, args
     # series = list(*series)
     # print "series:" + str(series)
 
