@@ -144,16 +144,17 @@ def column_jscode(labels=[""], xType="number", x=[""], *args):
 
     # chart = Chart()
     description = {}
-    chars = []  # lista de caracteres que se usan para identificar cada serie
 
+    chars = []  # lista de caracteres que se usan para identificar cada serie ['a', 'b', 'c']
     for i, arg in enumerate(series):
         c = string.ascii_lowercase[i]
         chars.append(c)
+        # print chars
         # print "i:" + str(i)
         # print "arg:" + str(arg)
         # print "c:" + str(c)
         if xType == 'date' and i == 0:  # i==0 --> x-axis
-            description[str(c)] = ('date', "")
+            description[str(c)] = ('date', "")  # str(c) == 'a' TODO reemplazar
         elif xType == 'string' and i == 0:   # i==0 --> x-axis
             description[str(c)] = ('string', "")
         else:
@@ -167,23 +168,29 @@ def column_jscode(labels=[""], xType="number", x=[""], *args):
     data = []
     keys = []
     for z in zipped:
+        # print z
         registro = {}
         for i, c in enumerate(chars):
             # print i, c
             if c not in keys: keys.append(c)
 
             if xType == 'date' and i == 0:  # unicode comparison, not string
-                registro[str(c)] = datetime.datetime.strptime(z[i], "%Y-%m-%d")
+                registro[str(c)] = datetime.datetime.strptime(z[i], "%Y-%m-%d")  # registro['a']
             else:  # normal case
                 registro[str(c)] = z[i]
         data.append(registro)
 
+        # print registro
+
     # print data
 
     data_table.LoadData(data)
-    jscode = data_table.ToJSCode("jscode_data",
-                                 columns_order=(keys),  # ("a", "b", "c", ...),
-                                 order_by="a")
+
+    jscode = data_table.ToJSCode(
+        "jscode_data",
+        columns_order=(keys),  # ("a", "b", "c", ...),
+        order_by="a"
+    )
     return jscode
 
 
@@ -206,9 +213,12 @@ def hist(request):
 def process_request(request):
     import ast
 
+    def strip_quotes(s):
+        return s.replace("'", "").replace("\"", "")
+
     def get_string_value(http_method, key, default):
         try:
-            return http_method[key]
+            return strip_quotes(http_method[key])
         except:
             return default
 
@@ -226,7 +236,7 @@ def process_request(request):
 
     def get_boolean_value(http_method, key):
         try:
-            if http_method[key].lower() == "true":
+            if strip_quotes(http_method[key]).lower() == "true":
                 return True
             else:
                 return False
@@ -242,28 +252,46 @@ def process_request(request):
     my_options = {}
 
     if request.method == 'GET':
-        x = get_list_value(request.GET, 'x')
-        ys = get_list_value(request.GET, 'ys')
-        kind = get_string_value(request.GET, 'kind', kind)
-        divId = get_string_value(request.GET, 'divId', divId)
-        xType = get_string_value(request.GET, 'xType', xType)
-        callback = get_string_value(request.GET, 'callback', callback)
-        labels = get_list_value(request.GET, 'labels')
-        colors = get_list_value(request.GET, 'colors')
-        stacked = get_boolean_value(request.GET, 'stacked')
-        my_options = get_dict_value(request.GET, 'my_options')
+        method = request.GET
 
     if request.method == 'POST':
-        x = get_list_value(request.POST, 'x')
-        ys = get_list_value(request.POST, 'ys')
-        kind = get_string_value(request.POST, 'kind', kind)
-        divId = get_string_value(request.POST, 'divId', divId)
-        xType = get_string_value(request.POST, 'xType', xType)
-        callback = get_string_value(request.POST, 'callback', callback)
-        labels = get_list_value(request.POST, 'labels')
-        colors = get_list_value(request.POST, 'colors')
-        stacked = get_boolean_value(request.POST, 'stacked')
-        my_options = get_dict_value(request.POST, 'my_options')
+        method = request.POST
+
+    x = get_list_value(method, 'x')
+    y = get_list_value(method, 'y')
+    ys = get_list_value(method, 'ys')
+    kind = get_string_value(method, 'kind', kind)
+    divId = get_string_value(method, 'divId', divId)
+    xType = get_string_value(method, 'xType', xType)
+    callback = get_string_value(method, 'callback', callback)
+    labels = get_list_value(method, 'labels')
+    colors = get_list_value(method, 'colors')
+    stacked = get_boolean_value(method, 'stacked')
+    my_options = get_dict_value(method, 'my_options')
+
+    if kind == 'PieChart':
+        # Ignore y
+        if x:
+            ys = [x]
+        else:
+            ys = [[]]
+        x = labels
+
+    if y and ys:
+        # Bad Request
+        print 'Bad Request'
+
+    if not labels:
+        print 'Missing labels'
+
+    if not divId:
+        print 'Missing divId'
+
+    if not divId:
+        divId = 'chart'
+
+    if y and not ys:
+        ys = [y]
 
     if colors == []:
         colors.append("#FAA519")
