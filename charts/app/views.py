@@ -4,20 +4,26 @@ from django.views.decorators.csrf import csrf_exempt
 from libs.gviz_api import *
 import json
 
-
 KINDS = ['AreaChart', 'ColumnChart']
 
 
-def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=False, kind='ColumnChart', colors="['#FAA519', '#009DCA', '#C53425', '#FFE07F', '#4B4B4D']", my_options={}):
+class Kinds():
     """
+    """
+    area = 'AreaChart'
+    column = 'ColumnChart'
 
-    :param jscode:
-    :param divId:
-    :param backgroundColor:
-    :param stacked:
-    :param kind:
-    :param colors:
-    :return:
+
+def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=False, kind='ColumnChart', colors="['#FAA519', '#009DCA', '#C53425', '#FFE07F', '#4B4B4D']", my_options={}):
+
+    """
+        :param jscode:
+        :param divId:
+        :param backgroundColor:
+        :param stacked:
+        :param kind:
+        :param colors:
+        :return:
     """
 
     options = dict()
@@ -42,41 +48,22 @@ def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=Fa
 
 @csrf_exempt
 def code_hist(request):
-    """
 
-    :param request:
-    :return: JavaScript code to embed in site (histogram)
     """
-
-    # import numpy
-    #
-    # x, ys, kind, divId, labels, colors, stacked, xType, callback, my_options = process_request(request)
-    #
-    # bins = numpy.linspace(start=0, stop=int(max(x)))
-    # histogram = numpy.histogram(x, bins)
-    # x = [histogram[1], histogram[0]]
-    # print labels, xType, x, ys
-    # jscode = column_jscode(labels, xType, x, ys)
-    # javascript = generate_javascript(jscode, divId, stacked=False, kind='ColumnChart', colors=colors, my_options=my_options)
-    #
-    # if callback != "":
-    #     javascript = "%s(%s)" % (callback, javascript)
-    #
-    # context = {
-    #     'javascript': javascript
-    # }
-    #
-    # response = render(request, 'app/javascript.html', context, content_type="text")
-    # response['Access-Control-Allow-Methods'] = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
+        :param request:
+        :return: JavaScript code to embed in site (histogram)
+    """
 
     x, ys, kind, divId, labels, colors, stacked, xType, callback, my_options = process_request(request)
 
     jscode = column_jscode(labels, xType, x, [])
-    javascript = generate_javascript(jscode, divId, stacked=stacked, kind='Histogram', colors=colors, my_options=my_options)
+    javascript = generate_javascript(jscode, divId, stacked=stacked, kind='Histogram', colors=colors,
+                                     my_options=my_options)
 
     context = {
         'javascript': javascript
     }
+
     return render(request, 'app/javascript.html', context, content_type="text")
 
 
@@ -138,15 +125,11 @@ def column_jscode(labels=[""], xType="number", x=[""], *args):
     """
     import string, datetime
 
-    # series: [[x-axis], [y1-axis], [y2-axis]]
     args = list(*args)
     series = []
     series.append(x)
     for elem in args:
         series.append(elem)
-    print series, args
-    # series = list(*series)
-    # print "series:" + str(series)
 
     # TODO deben tener el mismo largo
     # TODO len(labels)==len(args)
@@ -158,41 +141,40 @@ def column_jscode(labels=[""], xType="number", x=[""], *args):
     for i, arg in enumerate(series):
         c = string.ascii_lowercase[i]
         chars.append(c)
-        # print chars
-        # print "i:" + str(i)
-        # print "arg:" + str(arg)
-        # print "c:" + str(c)
+
         if xType == 'date' and i == 0:  # i==0 --> x-axis
             description[str(c)] = ('date', "")  # str(c) == 'a' TODO reemplazar
-        elif xType == 'string' and i == 0:   # i==0 --> x-axis
+
+        elif xType == 'datetime' and i == 0:  # i==0 --> x-axis
+            description[str(c)] = ('datetime', "")  # str(c) == 'a' TODO reemplazar
+
+        elif xType == 'string' and i == 0:  # i==0 --> x-axis
             description[str(c)] = ('string', "")
+
         else:
             description[str(c)] = ('number', labels[i - 1])
     data_table = DataTable(description)
-    # print data_table
 
     zipped = zip(*series)  # [(a1, b1, c1), (a2, b2, c2), ...]
-    # print zipped
-    # print chars
     data = []
     keys = []
     for z in zipped:
-        # print z
         registro = {}
         for i, c in enumerate(chars):
-            # print i, c
             if c not in keys: keys.append(c)
 
             if xType == 'date' and i == 0:  # unicode comparison, not string
-                registro[str(c)] = datetime.datetime.strptime(z[i], "%Y-%m-%d")  # registro['a']
+                date = datetime.datetime.strptime(z[i], "%Y-%m-%d")
+                registro[str(c)] = date  # registro['a']
+
+            if xType == 'datetime' and i == 0:  # unicode comparison, not string
+                dt = datetime.datetime.strptime(z[i], "%Y-%m-%dT%H:%M:%S")
+                registro[str(c)] = dt  # registro['a']
+
             else:  # normal case
                 registro[str(c)] = z[i]
+
         data.append(registro)
-
-        # print registro
-
-    # print data
-
     data_table.LoadData(data)
 
     jscode = data_table.ToJSCode(
@@ -205,11 +187,11 @@ def column_jscode(labels=[""], xType="number", x=[""], *args):
 
 @csrf_exempt
 def hist(request):
-
     x, ys, kind, divId, labels, colors, stacked, xType, callback, my_options = process_request(request)
 
     jscode = column_jscode(labels, xType, x, ys)
-    javascript = generate_javascript(jscode, divId, stacked=stacked, kind='Histogram', colors=colors, my_options=my_options)
+    javascript = generate_javascript(jscode, divId, stacked=stacked, kind='Histogram', colors=colors,
+                                     my_options=my_options)
 
     context = {
         'javascript': javascript
@@ -221,6 +203,8 @@ def hist(request):
 
 def process_request(request):
     import ast
+
+    print '.',
 
     def strip_quotes(s):
         return s.replace("'", "").replace("\"", "")
