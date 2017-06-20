@@ -168,7 +168,7 @@ def column_jscode(labels=[""], xType="number", x=[""], *args):
                 date = datetime.datetime.strptime(z[i], "%Y-%m-%d")
                 registro[str(c)] = date  # registro['a']
 
-            if xType == 'datetime' and i == 0:  # unicode comparison, not string
+            elif xType == 'datetime' and i == 0:  # unicode comparison, not string
                 dt = datetime.datetime.strptime(z[i], "%Y-%m-%dT%H:%M:%S")
                 registro[str(c)] = dt  # registro['a']
 
