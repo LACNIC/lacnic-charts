@@ -37,6 +37,7 @@ def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=Fa
         google_options.update(d)
 
     dumps_final = json.dumps(google_options)
+
     javascript = "google.load('visualization', '1.0', {'packages':['table', 'corechart']});" \
                  "google.setOnLoadCallback(function() {" \
                  " %s " \
@@ -203,8 +204,6 @@ def hist(request):
 
 def process_request(request):
     import ast
-
-    print '.',
 
     def strip_quotes(s):
         return s.replace("'", "").replace("\"", "")

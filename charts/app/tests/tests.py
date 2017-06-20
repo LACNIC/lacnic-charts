@@ -2,10 +2,10 @@ from django.test import TestCase, Client
 
 
 class ChartTestCases(TestCase):
+
     def test_con_x_y(self):
         c = Client()
         r = c.get("/?x=[1,2,3,4,5]&ys=[[5,4,3,3,3]]&labels=[%271%20eje%20ys%27]&divId=chart")
-        print r.status_code
         self.assertEqual(r.status_code, 200)
 
     def test_con_x_ys(self):
