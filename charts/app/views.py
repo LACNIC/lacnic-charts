@@ -1,5 +1,7 @@
 # coding=utf-8
 from django.shortcuts import render
+from django.template import Template, Context
+from django.template.loader import get_template
 from django.views.decorators.csrf import csrf_exempt
 from libs.gviz_api import *
 import json
@@ -38,13 +40,17 @@ def generate_javascript(jscode, divId, backgroundColor="transparent", stacked=Fa
 
     dumps_final = json.dumps(google_options)
 
-    javascript = "google.load('visualization', '1.0', {'packages':['table', 'corechart']});" \
-                 "google.setOnLoadCallback(function() {" \
-                 " %s " \
-                 "var jscode_table = new google.visualization.%s(document.getElementById('%s'));" \
-                 "jscode_table.draw(jscode_data, %s);" \
-                 "});" % (jscode, kind, divId, dumps_final)
-    return javascript
+    t = get_template('app/jscode.html')
+    c = Context(
+        {
+            "jscode": jscode,
+            "kind": kind,
+            "divId": divId,
+            "dumps_final": dumps_final
+        },
+        autoescape=False
+    )
+    return t.render(c)
 
 
 @csrf_exempt
@@ -235,7 +241,7 @@ def process_request(request):
         except:
             return False
 
-    kind = "ColumnChart"
+    kind = "Bar"  # "ColumnChart"
     divId = ""
     xType = "number"
     callback = ""

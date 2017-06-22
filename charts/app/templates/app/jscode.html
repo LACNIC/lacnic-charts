@@ -1,0 +1,18 @@
+var CHARTS = {}
+
+google.charts.load("43", {packages:["corechart"]});
+google.charts.setOnLoadCallback(function() {
+
+    {{ jscode }}
+
+    var jscode_table = new google.visualization.{{ kind }}(document.getElementById('{{ divId }}'));
+
+
+    CHARTS.draw = function() {
+        jscode_table.draw(jscode_data, {{ dumps_final }});
+    }
+
+    CHARTS.draw();
+});
+
+
