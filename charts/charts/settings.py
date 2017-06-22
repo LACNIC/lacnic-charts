@@ -48,6 +48,13 @@ if HOSTNAME == 'simon':
     #     'authorization',
     #     'x-csrftoken'
     # )
+else:
+    ALLOWED_HOSTS = [
+        '*'
+    ]
+    CORS_ORIGIN_WHITELIST = (
+        '*'
+    )
 
 TEMPLATE_DEBUG = True
 
