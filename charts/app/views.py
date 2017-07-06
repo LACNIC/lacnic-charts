@@ -91,16 +91,9 @@ def code(request):
         'javascript': javascript
     }
 
-    return render(request, 'app/javascript.html', context, content_type="text")
+    http_response = render(request, 'app/javascript.html', context, content_type="text")
 
-
-def candlestick(request):
-    """
-
-    :param request:
-    :return:
-    """
-    x, ys, kind, divId, labels, colors, stacked, xType, callback = process_request(request)
+    return http_response
 
 
 def home(request):

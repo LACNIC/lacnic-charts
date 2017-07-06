@@ -7,13 +7,14 @@
     <script src="https://www.gstatic.com/charts/loader.js" type="text/javascript"></script>
     <script type="text/javascript">
 
-    {{ javascript | safe }}
+        google.charts.load("43", {packages: ["corechart"]});
+
+        {{ javascript | safe }}
 
     </script>
 
 </head>
 <body>
-
 <div id="chart" style="width: {{ width | safe }}; height: {{ height | safe }}"></div>
 
 </body>

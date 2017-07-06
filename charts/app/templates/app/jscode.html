@@ -1,18 +1,34 @@
-var CHARTS = {}
+var CHARTS = (typeof CHARTS === 'undefined') ? {} : CHARTS;
 
-google.charts.load("43", {packages:["corechart"]});
-google.charts.setOnLoadCallback(function() {
+function googleChartLoaded() {
+
+    CHARTS.loaded = true;
 
     {{ jscode }}
 
-    var jscode_table = new google.visualization.{{ kind }}(document.getElementById('{{ divId }}'));
+    var jscode_table_{{ divId }} = new google.visualization.{{ kind }}(document.getElementById('{{ divId }}'));
 
 
-    CHARTS.draw = function() {
-        jscode_table.draw(jscode_data, {{ dumps_final }});
+    CHARTS.draw_{{ divId }} = function() {
+        jscode_table_{{ divId }}.draw(jscode_data, {{ dumps_final }});
     }
 
-    CHARTS.draw();
-});
+    CHARTS.draw_{{ divId }}();
+}
+
+if(typeof CHARTS.loading === 'undefined') {
+    CHARTS.loading = true;  //set sth.
+    google.charts.load("43", {packages:["corechart"]});
+}
+
+google.charts.setOnLoadCallback(googleChartLoaded);
+
+if(typeof CHARTS.loaded !== 'undefined') {
+    googleChartLoaded();
+}
+
+{#else {#}
+{#    google.charts.setOnLoadCallback(googleChartLoaded);#}
+{#}#}
 
 
