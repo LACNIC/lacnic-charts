@@ -1,13 +1,20 @@
 config:
-  target: 'http://127.0.0.1'
   phases:
-    - duration: 60
-      arrivalRate: 20
-  defaults:
-    headers:
-      x-my-service-auth: '987401838271002188298567'
+    - arrivalRate: 10
+      duration: 30
+      name: 'Warm up'
+    - rampTo: 500
+      arrivalRate: 10
+      duration: 120
+      name: 'Ramp from 10 up to 100'
+    - arrivalRate: 500
+      duration: 30
+      name: 'Constant load @ 500'
+  environments:
+    old:
+      target: 'http://127.0.0.1:8001'
 
 scenarios:
   - flow:
     - get:
-        url: "/"
+        url: "/hist/?x=[1,2,3,4,5,1,1,1]&labels=[%27prueba%20siple%20de%20hist%27]&divId=chart"
