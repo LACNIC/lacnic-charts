@@ -11,6 +11,9 @@ addons:
     packages:
     - libpq5=9.5.13-0ubuntu0.16.04
     - libpq-dev=9.5.13-0ubuntu0.16.04
+    - python-dev
+    - apache2
+    - apache2-dev
 
 before_install:
     - export DISPLAY=:99.0
