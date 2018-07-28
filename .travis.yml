@@ -2,17 +2,14 @@ language: python
 sudo: required
 
 python:
-  - "2.7"
-
-services:
-  - postgresql
+  - "2.7.14"
 
 addons:
+  postgresql: "9.5"
   apt:
     packages:
-    - libpq-dev
-    - python-dev
-    - python-psycopg2
+    - libpq5=9.5.13-0ubuntu0.16.04
+    - libpq-dev=9.5.13-0ubuntu0.16.04
 
 before_install:
     - export DISPLAY=:99.0
