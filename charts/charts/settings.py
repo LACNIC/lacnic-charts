@@ -24,7 +24,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 # CORS_ORIGIN_ALLOW_ALL = True
 HOSTNAME = socket.gethostname()
-if HOSTNAME == 'simon':
+if 'simon' in HOSTNAME:
     DEBUG = False
     ALLOWED_HOSTS = [
         'simon.lacnic.net',
