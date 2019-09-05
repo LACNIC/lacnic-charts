@@ -30,6 +30,22 @@ class ChartTestCases(TestCase):
             "/?x=[%272017-06-15%27,%272017-06-16%27,%272017-06-17%27,%272017-06-18%27,%272017-06-19%27]&ys=[[5,4,3,3,3],[1,2,3,4,5]]&labels=[%27eje%20x%20con%20fecha%27,%20%27mi%20otra%20label%27]&divId=chart&xType=%27date%27&stacked=%27true%27&colors=[#FAA519,%27blue%27]")
         self.assertEqual(r.status_code, 200)
 
+    def test_con_fechas_x_post(self):
+        c = Client()
+        r = c.post(
+            path="/",
+            data={
+                "x": "[\"2017-06-15\",\"2017-06-16\",\"2017-06-17\",\"2017-06-18\",\"2017-06-19\"]",
+                "ys": "[[5,4,3,3,3],[1,2,3,4,5]]",
+                "labels": "[\"eje x con fecha\", \"mi otra label\"]",
+                "divId": "chart",
+                "xType": "date",
+                "stacked": "true",
+                "colors": "[\"#FAA519\", \"#FAA519\"]"
+            }
+        )
+        self.assertEqual(r.status_code, 200)
+
     def test_con_y_ys(self):
         c = Client()
         r = c.get(

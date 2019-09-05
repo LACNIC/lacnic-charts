@@ -246,7 +246,8 @@ def process_request(request):
         method = request.GET
 
     if request.method == 'POST':
-        method = request.POST
+        body = request.body or request.POST
+        method = json.loads(body)
 
     x = get_list_value(method, 'x')
     y = get_list_value(method, 'y')
